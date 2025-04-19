@@ -404,21 +404,30 @@ void mpi_fdiv_qr(mpi_t q, mpi_t r, const mpi_t n, const mpi_t d)
 
 void mpi_gcd(mpi_t rop, const mpi_t op1, const mpi_t op2)
 {
-    if (mpi_cmp_u32(op2, 0) == 0) {
-        mpi_set(rop, op1);
+    if (mpi_cmp_u32(op1, 0) == 0 || mpi_cmp_u32(op2, 0) == 0) {
+        fprintf(stderr, "Both operands are zero, GCD undefined\n");
         return;
     }
         
-    mpi_t q, r;
+    mpi_t opa, opb, q, r;
+    mpi_init(opa); // Dividend
+    mpi_init(opb); // Divisor        
     mpi_init(q);
     mpi_init(r);
-
-    mpi_fdiv_qr(q, r, op1, op2);
-
-    mpi_gcd(rop, op2, r);                                     
+    mpi_set(opa,op1);
+    mpi_set(opb,op2);
+    while(mpi_cmp_u32(opb, 0) != 0){
+        mpi_fdiv_qr(q, r, opa, opb);   
+        mpi_set(opa,opb);
+        mpi_set(opb,r);
+    }
+    mpi_set(rop,opa);
 
     mpi_clear(q);
     mpi_clear(r);
+    mpi_clear(opa);
+    mpi_clear(opb);
+    
 }
 
 int main(){
